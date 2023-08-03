@@ -61,8 +61,8 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
         model = attempt_load(weights, map_location=device)  # load FP32 model
         stride = int(model.stride.max())  # model stride
         names = model.module.names if hasattr(model, 'module') else model.names  # get class names
-        with open(os.path.join(source,"classes.txt"),"w") as f:
-            [f.write(name+"\n") for name in names]
+        with open(os.path.join(source,"classes.txt"),"w", encoding='utf-8') as f:
+            [f.write(str(name)+"\n") for name in names]
 
         if half:
             model.half()  # to FP16
@@ -104,7 +104,8 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
         t1 = time_sync()
         if pt:
             visualize = increment_path(save_dir / Path(path).stem, mkdir=True) if visualize else False
-            pred = model(img, augment=augment, visualize=visualize)[0]
+            #pred = model(img, augment=augment, visualize=visualize)[0]
+            pred = model(img, augment=augment)[0]
         elif onnx:
             pred = torch.tensor(session.run([session.get_outputs()[0].name], {session.get_inputs()[0].name: img}))
 
@@ -143,7 +144,7 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
                     if save_txt:  # Write to file
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                         line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
-                        with open(txt_path + '.txt', 'a') as f:
+                        with open(txt_path + '.txt', 'a', encoding='utf-8') as f:
                             f.write(('%g ' * len(line)).rstrip() % line + '\n')
 
                     if save_img or save_crop or view_img:  # Add bbox to image

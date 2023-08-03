@@ -1,57 +1,29 @@
-# labelGo
-<p>Guide Language:<a href="https://github.com/cnyvfang/labelGo-Yolov5AutoLabelImg/blob/master/readme_zh_cn.md">简体中文</a></p>
-<p>A graphical Semi-automatic annotation tool based on <a href="https://github.com/tzutalin/labelImg">labelImg</a> and <a href="https://github.com/ultralytics/yolov5">YOLOv5</a></p>
-<p>Semi-automatic annotation of datasets by existing yolov5 pytorch models</p>
+# LabelGo
+基于yolov5的半自动标注工具
 
-## News
-**labelGo now supports the latest version of YOLOv5, and automatic classes.txt file generation**
+原项目地址：https://github.com/cnyvfang/labelGo-Yolov5AutoLabelImg.git
 
-### Demonstration of semi-automatic labeling function
-![image](https://github.com/cnyvfang/labelGo-Yolov5AutoLabelImg/blob/master/demo/demo1.gif) 
-### Demonstration of converting Yolo format to VOC format with one click
-![image](https://github.com/cnyvfang/labelGo-Yolov5AutoLabelImg/blob/master/demo/demo2.gif) 
+需要python==3.8其他版本可能出现各种bug
 
-## Note
-<p>If there is a problem, please put it forward in the issue.</p>
-<p>The annotation file is saved in the same location as the picture folder.</p>
-<p>Recommended version of python: python 3.8.</p>
-<p>Recommended for conda environments.</p>
-<p>The item is completely free and it is forbidden to sell the item in any way. </p>
-<p>This project has support for the latest version of YOLOv5, if you need to use an older version that supports YOLOv5 version5, you can find the source code in Release. </p>
-
-
-## Installation and use
-<p>1.Fetching projects from git</p>
-
-```bash
-git clone https://github.com/cnyvfang/labelGo-Yolov5AutoLabelImg.git
+推荐用独立的环境运行
+## 食用方法
 ```
-
-<p>2.Switching the operating directory to the project directory</p>
-
-```bash
-cd labelGo-Yolov5AutoLabelImg
-```
-
-<p>3.Installation environment</p>
-
-```bash
+conda create -n labelgo python=3.8
+conda activate labelgo
 pip install -r requirements.txt
-```
-
-<p>4.Launching applications</p>
-
-```bash
 python labelGo.py
 ```
 
-<p>5. Click on the "Open directory" button to select the folder where the images are stored</p>
+## change log
 
-<p>6. Click on the "Auto Annotate" button to confirm that the information is correct and then select the trained yolov5 pytorch model to complete the auto annotation</p>
+### 2023年6月20日
+- 打开目录时默认载入classes.txt（如果存在）避免类别丢失
+- 修改了默认保存文件的名称，避免二次编辑时标签丢失
+- 保存新的标签文件时不弹窗
 
-<p>7. Adjust the automatic annotation results according to the actual requirements and save them</p>
+### 2023年7月4日
+- 更新了yolov5-lite模块版本(https://github.com/ppogg/YOLOv5-Lite.git)
+- 附加一个可用的权重文件`v5lite-e.pt`
 
-## Acknowledgements
-Thanks to [tangtang666](https://github.com/tangtang666) for submitting support for the latest version of YOLOv5
-
-Thanks to [Iceprism](https://github.com/Iceprism) for fixing the bugs in the Chinese version.
+### 2023年7月8日
+- 中文标签支持(统一采用utf-8编码)

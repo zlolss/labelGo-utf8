@@ -919,7 +919,9 @@ class MainWindow(QMainWindow, WindowMixin):
                 self.label_file.save_pascal_voc_format(annotation_file_path, shapes, self.file_path, self.image_data,
                                                        self.line_color.getRgb(), self.fill_color.getRgb())
             elif self.label_file_format == LabelFileFormat.YOLO:
-                if annotation_file_path[-4:].lower() != ".txt":
+                if annotation_file_path[-4:].lower() == ".xml":
+                    annotation_file_path[-4:] = ".txt"
+                elif annotation_file_path[-4:].lower() != ".txt":
                     annotation_file_path += TXT_EXT
                 self.label_file.save_yolo_format(annotation_file_path, shapes, self.file_path, self.image_data, self.label_hist,
                                                  self.line_color.getRgb(), self.fill_color.getRgb())
@@ -1391,7 +1393,7 @@ class MainWindow(QMainWindow, WindowMixin):
             self.setWindowTitle(__appname__)
 
 #saved_path
-
+    
 
     def import_dir_images(self, dir_path):
         if not self.may_continue() or not dir_path:
@@ -1401,6 +1403,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.dir_name = dir_path
         self.file_path = None
         self.file_list_widget.clear()
+        self.update_classes_if_exists(dir_path)
         self.m_img_list = self.scan_all_images(dir_path)
         self.img_count = len(self.m_img_list)
         self.open_next_image()
@@ -1493,7 +1496,18 @@ class MainWindow(QMainWindow, WindowMixin):
             self.img_count = 1
             self.load_file(filename)
 
+    def fill_annotation_file_ext(self, file_path):
+            # todo:
+        if self.label_file_format == LabelFileFormat.PASCAL_VOC:
+            return file_path+'.xml'
+        elif self.label_file_format == LabelFileFormat.YOLO:
+            return file_path+'.txt'
+        elif self.label_file_format == LabelFileFormat.CREATE_ML:
+            return file_path+'.json'
+        return file_path
+
     def save_file(self, _value=False):
+        
         if self.default_save_dir is not None and len(ustr(self.default_save_dir)):
             if self.file_path:
                 image_file_name = os.path.basename(self.file_path)
@@ -1504,8 +1518,12 @@ class MainWindow(QMainWindow, WindowMixin):
             image_file_dir = os.path.dirname(self.file_path)
             image_file_name = os.path.basename(self.file_path)
             saved_file_name = os.path.splitext(image_file_name)[0]
-            saved_path = os.path.join(image_file_dir, saved_file_name)
-            self._save_file(saved_path if self.label_file
+            saved_path = os.path.join(image_file_dir, self.fill_annotation_file_ext(saved_file_name))
+            # 新建文件采用静默模式
+            if not os.path.exists(saved_path):
+                self._save_file(saved_path)
+            else:
+                self._save_file(saved_path if self.label_file
                             else self.save_file_dialog(remove_ext=False))
 
     def save_file_as(self, _value=False):
@@ -1515,6 +1533,7 @@ class MainWindow(QMainWindow, WindowMixin):
     def save_file_dialog(self, remove_ext=True):
         caption = '%s - Choose File' % __appname__
         filters = 'File (*%s)' % LabelFile.suffix
+        #filters = 'File (*%s)' % self.fill_annotation_file_ext('')
         open_dialog_path = self.current_path()
         dlg = QFileDialog(self, caption, open_dialog_path, filters)
         dlg.setDefaultSuffix(LabelFile.suffix[1:])
@@ -1627,6 +1646,19 @@ class MainWindow(QMainWindow, WindowMixin):
     def move_shape(self):
         self.canvas.end_move(copy=False)
         self.set_dirty()
+        
+    def update_classes_if_exists(self, dir_path):
+        # 载入目录中已存在得classes.txt文件，避免出现覆盖
+        classes_path = os.path.join(dir_path,'classes.txt')
+        if os.path.exists(classes_path):
+            self.label_hist = None
+            with codecs.open(classes_path, 'r', 'utf8') as f:
+                for line in f:
+                    line = line.strip()
+                    if self.label_hist is None:
+                        self.label_hist = [line]
+                    else:
+                        self.label_hist.append(line)
 
     def load_predefined_classes(self, predef_classes_file):
         if os.path.exists(predef_classes_file) is True:
